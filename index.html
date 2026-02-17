@@ -1,0 +1,374 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<title>Checklist Report Tool</title>
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+<style>
+body {
+    font-family: 'Segoe UI', sans-serif;
+    background: #f4f7f6;
+    display: flex;
+    justify-content: center;
+    padding: 20px;
+    transition: 0.3s;
+}
+
+body.dark {
+    background: #1e272e;
+    color: #f5f6fa;
+}
+
+.card {
+    background: #fff;
+    width: 100%;
+    max-width: 650px;
+    padding: 25px;
+    border-radius: 14px;
+    box-shadow: 0 10px 25px rgba(0,0,0,0.1);
+    position: relative;
+    transition: 0.3s;
+}
+
+body.dark .card {
+    background: #2f3640;
+}
+
+/* MODERN TOGGLE SWITCH */
+.theme-switch {
+    position: absolute;
+    top: 20px;
+    right: 22px;
+}
+
+.theme-switch input {
+    display: none;
+}
+
+.theme-switch label {
+    width: 42px;
+    height: 22px;
+    background: #dcdde1;
+    display: block;
+    border-radius: 50px;
+    position: relative;
+    cursor: pointer;
+    transition: 0.3s;
+}
+
+.theme-switch label::after {
+    content: "";
+    width: 18px;
+    height: 18px;
+    background: white;
+    position: absolute;
+    top: 2px;
+    left: 2px;
+    border-radius: 50%;
+    transition: 0.3s;
+    box-shadow: 0 2px 6px rgba(0,0,0,0.2);
+}
+
+.theme-switch input:checked + label {
+    background: #4cd137;
+}
+
+.theme-switch input:checked + label::after {
+    transform: translateX(20px);
+}
+
+body.dark .theme-switch label {
+    background: #555;
+}
+
+body.dark .theme-switch input:checked + label {
+    background: #00a8ff;
+}
+
+.title-box {
+    background: linear-gradient(135deg, #5f6a72, #2f3640);
+    color: white;
+    padding: 14px;
+    border-radius: 10px;
+    text-align: center;
+    font-size: 1.2em;
+    font-weight: bold;
+    margin-bottom: 15px;
+    margin-top: 10px;
+}
+
+/* GREY BLOCK FOR MAIN FIELDS */
+.main-block {
+    background: #f0f2f5;
+    padding: 15px;
+    border-radius: 10px;
+    margin-bottom: 15px;
+    border: 1px solid #dcdde1;
+}
+
+body.dark .main-block {
+    background: #3d3d3d;
+    border: 1px solid #555;
+}
+
+.status-widget {
+    text-align: center;
+    padding: 8px;
+    border-radius: 8px;
+    margin-bottom: 15px;
+    font-weight: bold;
+}
+
+.pending { background: #fbc531; color: #000; }
+.approved { background: #27ae60; color: #fff; }
+.rejected { background: #c0392b; color: #fff; }
+
+.section { margin-bottom: 15px; }
+
+label {
+    font-weight: 600;
+    font-size: 0.9em;
+    display: block;
+    margin-bottom: 6px;
+}
+
+input[type="text"], textarea {
+    width: 100%;
+    padding: 8px;
+    border-radius: 6px;
+    border: 1px solid #ccc;
+    transition: 0.2s;
+}
+
+textarea.filled {
+    background: #ffe6e6;
+    border: 2px solid #c0392b;
+}
+
+button {
+    width: 100%;
+    padding: 12px;
+    border: none;
+    border-radius: 8px;
+    font-weight: bold;
+    cursor: pointer;
+    margin-top: 8px;
+}
+
+.copy-btn { background: #27ae60; color: white; }
+.clean-btn { background: #e67e22; color: white; }
+
+footer {
+    margin-top: 20px;
+    text-align: center;
+    font-size: 0.75em;
+    opacity: 0.8;
+}
+
+.popup {
+    position: fixed;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    background: #2f3640;
+    color: white;
+    padding: 20px 30px;
+    border-radius: 10px;
+    text-align: center;
+    display: none;
+    z-index: 999;
+}
+</style>
+</head>
+
+<body>
+
+<div class="card">
+
+<!-- NEW MODERN TOGGLE -->
+<div class="theme-switch">
+    <input type="checkbox" id="darkModeToggle" onchange="toggleDark()">
+    <label for="darkModeToggle"></label>
+</div>
+
+<div class="title-box">Checklist FO Report Tool</div>
+
+<div id="widget" class="status-widget pending">Pending</div>
+
+<div class="main-block">
+
+<div class="section">
+<label>CHECKLIST</label>
+<input type="text" id="checklist" placeholder="CAJ0590 - CAJ0042 CHECKLIST">
+</div>
+
+<div class="section">
+<label>TEC</label>
+<input type="text" id="tec" placeholder="3G/4G 1700/1900">
+</div>
+
+<div class="section">
+<label>PLAN</label>
+<input type="text" id="plan" placeholder="NEW SITE">
+</div>
+
+</div>
+
+<div class="section">
+<input type="checkbox" id="extended"> Extended Site
+</div>
+
+<hr>
+
+<div id="observations"></div>
+
+<div class="section">
+<label>cc:</label>
+<input type="text" id="cc" placeholder="Mr">
+</div>
+
+<button class="copy-btn" onclick="generateReport()">Copy Checklist Report</button>
+<button class="clean-btn" onclick="cleanAll()">Clean All</button>
+
+<footer>
+© Bryam Broncano (954465531) – CheckList Tool <br>
+Checklist Tool v2.0.0 - Last edition: 17 February 2026
+</footer>
+
+</div>
+
+<div id="popup" class="popup"></div>
+
+<script>
+const params = ["OUTDOOR","INDOOR","KMZ","PHOTOS","ZIP/RAR","PL"];
+const obsContainer = document.getElementById("observations");
+
+function renderObservations(){
+    obsContainer.innerHTML="";
+    const isExtended=document.getElementById("extended").checked;
+    params.forEach(p=>{
+        if(p==="PL" && isExtended) return;
+        const div=document.createElement("div");
+        div.innerHTML=`<label>${p}</label>
+        <textarea id="obs_${p}" placeholder="Write observation if NOK..."></textarea>`;
+        obsContainer.appendChild(div);
+        const ta=div.querySelector("textarea");
+        ta.addEventListener("input",()=>{
+            ta.classList.toggle("filled",ta.value.trim()!=="");
+            updateWidget();
+        });
+    });
+}
+document.getElementById("extended").addEventListener("change",renderObservations);
+renderObservations();
+
+function updateWidget(){
+    const checklist=document.getElementById("checklist").value.trim();
+    const tec=document.getElementById("tec").value.trim();
+    const plan=document.getElementById("plan").value.trim();
+    const widget=document.getElementById("widget");
+
+    if(!checklist || !tec || !plan){
+        widget.className="status-widget pending";
+        widget.innerText="Pending";
+        return;
+    }
+
+    let hasNok=false;
+    params.forEach(p=>{
+        const el=document.getElementById(`obs_${p}`);
+        if(el && el.value.trim()) hasNok=true;
+    });
+
+    if(hasNok){
+        widget.className="status-widget rejected";
+        widget.innerText="Rejected";
+    } else {
+        widget.className="status-widget approved";
+        widget.innerText="Approved";
+    }
+}
+
+document.querySelectorAll("#checklist,#tec,#plan")
+.forEach(el=>el.addEventListener("input",updateWidget));
+
+function generateReport(){
+    const checklist=document.getElementById("checklist").value.trim();
+    const tec=document.getElementById("tec").value.trim();
+    const plan=document.getElementById("plan").value.trim();
+    const cc=document.getElementById("cc").value.trim();
+    const isExtended=document.getElementById("extended").checked;
+
+    if(!checklist || !tec || !plan){
+        alert("Checklist, TEC and PLAN are mandatory.");
+        return;
+    }
+
+    let summary=[];
+    let obsLines=[];
+    let allFilled=true;
+    let hasNok=false;
+
+    params.forEach(p=>{
+        if(p==="PL" && isExtended) return;
+        const el=document.getElementById(`obs_${p}`);
+        const text=el?el.value.trim():"";
+        if(text){
+            summary.push(`${p}: NOK`);
+            obsLines.push(`* ${p}: ${text}`);
+            hasNok=true;
+        } else {
+            summary.push(`${p}: OK`);
+            allFilled=false;
+        }
+    });
+
+    const status=hasNok?"REJECTED":"APPROVED";
+    const date=new Date().toLocaleDateString("en-GB");
+
+    let report="";
+    report+="DEPT: TRA / Cable Operation Team\n";
+    report+=`${checklist}\n`;
+    report+=`TEC: ${tec}\n`;
+    report+=`PLAN: ${plan}\n\n`;
+    report+=summary.join("\n")+"\n\n";
+    report+=`STATUS: ${status}\n`;
+    report+=`DATE: ${date}\n\n`;
+
+    if(obsLines.length){
+        report+="OBS:\n";
+        report+=obsLines.join("\n");
+        if(allFilled){
+            report+="\n\n⚠️ Please review the checklist guide in the group description ⚠️";
+        }
+        report+="\n\n";
+    }
+
+    report+=`cc: ${cc}`;
+
+    navigator.clipboard.writeText(report);
+    showPopup(`${checklist}\n${status}\nCopied successfully`);
+}
+
+function showPopup(text){
+    const popup=document.getElementById("popup");
+    popup.innerText=text;
+    popup.style.display="block";
+    setTimeout(()=>popup.style.display="none",2500);
+}
+
+function cleanAll(){
+    document.querySelectorAll("input[type=text],textarea").forEach(el=>el.value="");
+    document.getElementById("extended").checked=false;
+    renderObservations();
+    updateWidget();
+}
+
+function toggleDark(){
+    document.body.classList.toggle("dark");
+}
+</script>
+
+</body>
+</html>
