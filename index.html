@@ -2,373 +2,940 @@
 <html lang="en">
 <head>
 <meta charset="UTF-8">
-<title>Checklist Report Tool</title>
+<title>FO Field Validation & Reporting Tool</title>
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-
+<link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;600&family=Sora:wght@400;600;700&display=swap" rel="stylesheet">
 <style>
-body {
-    font-family: 'Segoe UI', sans-serif;
-    background: #f4f7f6;
-    display: flex;
-    justify-content: center;
-    padding: 20px;
-    transition: 0.3s;
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0;}
+ 
+:root{
+  --bg:#f0f2f5;
+  --surface:#ffffff;
+  --surface2:#eef1f4;
+  --header:#2f3640;
+  --text:#1a1e26;
+  --text2:#5a6072;
+  --border:#d8dce6;
+  --accent:#00a8ff;
+  --green:#27ae60;
+  --orange:#e67e22;
+  --red:#c0392b;
+  --yellow:#f0b429;
+  --shadow:0 4px 20px rgba(0,0,0,0.08);
+  --radius:12px;
 }
-
-body.dark {
-    background: #1e272e;
-    color: #f5f6fa;
+ 
+body.dark{
+  --bg:#0d1117;
+  --surface:#161b22;
+  --surface2:#21262d;
+  --header:#000000;
+  --text:#e6edf3;
+  --text2:#8b949e;
+  --border:#30363d;
+  --shadow:0 4px 20px rgba(0,0,0,0.4);
 }
-
-.card {
-    background: #fff;
-    width: 100%;
-    max-width: 650px;
-    padding: 25px;
-    border-radius: 14px;
-    box-shadow: 0 10px 25px rgba(0,0,0,0.1);
-    position: relative;
-    transition: 0.3s;
+ 
+body{
+  font-family:'Sora',sans-serif;
+  background:var(--bg);
+  color:var(--text);
+  transition:background .3s,color .3s;
+  min-height:100vh;
 }
-
-body.dark .card {
-    background: #2f3640;
+ 
+/* ===== HEADER ===== */
+.header{
+  background:var(--header);
+  color:#fff;
+  padding:12px 24px;
+  display:flex;
+  justify-content:space-between;
+  align-items:center;
+  font-weight:700;
+  font-size:13px;
+  letter-spacing:.5px;
+  position:sticky;
+  top:0;
+  z-index:100;
+  transition:background .3s;
 }
-
-/* MODERN TOGGLE SWITCH */
-.theme-switch {
-    position: absolute;
-    top: 20px;
-    right: 22px;
+ 
+.header-left{display:flex;align-items:center;gap:10px;}
+.header-dot{width:8px;height:8px;background:var(--accent);border-radius:50%;}
+ 
+/* ===== TOGGLE ===== */
+.theme-switch input{display:none;}
+.theme-switch label{
+  width:44px;height:24px;
+  background:#555;
+  border-radius:50px;
+  display:block;position:relative;cursor:pointer;transition:.3s;
 }
-
-.theme-switch input {
-    display: none;
+.theme-switch label::after{
+  content:"";width:18px;height:18px;
+  background:white;position:absolute;
+  top:3px;left:3px;border-radius:50%;transition:.3s;
 }
-
-.theme-switch label {
-    width: 42px;
-    height: 22px;
-    background: #dcdde1;
-    display: block;
-    border-radius: 50px;
-    position: relative;
-    cursor: pointer;
-    transition: 0.3s;
+.theme-switch input:checked+label{background:var(--accent);}
+.theme-switch input:checked+label::after{transform:translateX(20px);}
+ 
+/* ===== LAYOUT ===== */
+.container{
+  display:flex;gap:18px;
+  padding:20px;
+  max-width:1380px;
+  margin:0 auto;
+  align-items:flex-start;
 }
-
-.theme-switch label::after {
-    content: "";
-    width: 18px;
-    height: 18px;
-    background: white;
-    position: absolute;
-    top: 2px;
-    left: 2px;
-    border-radius: 50%;
-    transition: 0.3s;
-    box-shadow: 0 2px 6px rgba(0,0,0,0.2);
+ 
+/* ===== CARDS ===== */
+.card{
+  background:var(--surface);
+  border-radius:var(--radius);
+  box-shadow:var(--shadow);
+  padding:20px;
+  border:1px solid var(--border);
+  transition:background .3s,border-color .3s;
 }
-
-.theme-switch input:checked + label {
-    background: #4cd137;
+ 
+.left-panel{flex:1;min-width:0;display:flex;flex-direction:column;gap:14px;}
+.right-panel{width:380px;flex-shrink:0;}
+ 
+/* ===== MODULE HEADER ===== */
+.mod-header{
+  display:flex;align-items:center;justify-content:space-between;
+  cursor:pointer;
+  padding:10px 14px;
+  border-radius:9px;
+  background:var(--surface2);
+  border:1px solid var(--border);
+  transition:background .2s;
+  user-select:none;
 }
-
-.theme-switch input:checked + label::after {
-    transform: translateX(20px);
+.mod-header:hover{background:var(--border);}
+body.dark .mod-header:hover{background:#2d333b;}
+ 
+.mod-title{
+  display:flex;align-items:center;gap:9px;
+  font-size:13px;font-weight:700;letter-spacing:.3px;
+  color:var(--text);
 }
-
-body.dark .theme-switch label {
-    background: #555;
+.mod-icon{
+  width:26px;height:26px;border-radius:7px;
+  background:var(--accent);color:#fff;
+  display:flex;align-items:center;justify-content:center;
+  font-size:12px;font-weight:700;flex-shrink:0;
 }
-
-body.dark .theme-switch input:checked + label {
-    background: #00a8ff;
+.mod-arrow{
+  font-size:11px;color:var(--text2);transition:transform .25s;
 }
-
-.title-box {
-    background: linear-gradient(135deg, #5f6a72, #2f3640);
-    color: white;
-    padding: 14px;
-    border-radius: 10px;
-    text-align: center;
-    font-size: 1.2em;
-    font-weight: bold;
-    margin-bottom: 15px;
-    margin-top: 10px;
+.mod-arrow.open{transform:rotate(180deg);}
+ 
+.mod-body{
+  display:none;padding:14px;
+  border:1px solid var(--border);
+  border-top:none;border-radius:0 0 9px 9px;
+  background:var(--surface);
+  transition:background .3s;
 }
-
-/* GREY BLOCK FOR MAIN FIELDS */
-.main-block {
-    background: #f0f2f5;
-    padding: 15px;
-    border-radius: 10px;
-    margin-bottom: 15px;
-    border: 1px solid #dcdde1;
+.mod-body.open{display:block;}
+ 
+/* ===== FORM ELEMENTS ===== */
+label{
+  font-size:11px;font-weight:700;
+  letter-spacing:.5px;color:var(--text2);
+  text-transform:uppercase;
+  display:block;margin-bottom:4px;margin-top:10px;
 }
-
-body.dark .main-block {
-    background: #3d3d3d;
-    border: 1px solid #555;
+label:first-child{margin-top:0;}
+ 
+input[type=text],input[type=number],textarea,select{
+  width:100%;padding:8px 10px;
+  border-radius:7px;border:1px solid var(--border);
+  font-family:'Sora',sans-serif;font-size:13px;
+  background:var(--surface2);color:var(--text);
+  outline:none;transition:.2s;
 }
-
-.status-widget {
-    text-align: center;
-    padding: 8px;
-    border-radius: 8px;
-    margin-bottom: 15px;
-    font-weight: bold;
+input:focus,textarea:focus,select:focus{
+  border-color:var(--accent);
+  box-shadow:0 0 0 3px rgba(0,168,255,.12);
 }
-
-.pending { background: #fbc531; color: #000; }
-.approved { background: #27ae60; color: #fff; }
-.rejected { background: #c0392b; color: #fff; }
-
-.section { margin-bottom: 15px; }
-
-label {
-    font-weight: 600;
-    font-size: 0.9em;
-    display: block;
-    margin-bottom: 6px;
+body.dark input,body.dark textarea,body.dark select{
+  background:#0d1117;color:var(--text);
 }
-
-input[type="text"], textarea {
-    width: 100%;
-    padding: 8px;
-    border-radius: 6px;
-    border: 1px solid #ccc;
-    transition: 0.2s;
+ 
+textarea{resize:vertical;min-height:60px;}
+textarea.filled{background:#ffeaea;border-color:var(--red);}
+body.dark textarea.filled{background:#2a1517;border-color:#c0392b;}
+ 
+/* ===== BUTTONS ===== */
+.btn{
+  width:100%;padding:10px;border:none;border-radius:8px;
+  margin-top:10px;font-family:'Sora',sans-serif;
+  font-weight:700;font-size:13px;cursor:pointer;
+  transition:filter .2s,transform .1s;
+  letter-spacing:.3px;
 }
-
-textarea.filled {
-    background: #ffe6e6;
-    border: 2px solid #c0392b;
+.btn:hover{filter:brightness(1.08);}
+.btn:active{transform:scale(.98);}
+ 
+.btn-blue{background:var(--accent);color:#fff;}
+.btn-green{background:var(--green);color:#fff;}
+.btn-orange{background:var(--orange);color:#fff;}
+.btn-gray{background:var(--border);color:var(--text);margin-top:6px;}
+.btn-red{background:var(--red);color:#fff;}
+.btn-sm{
+  width:auto;padding:7px 14px;font-size:12px;margin-top:8px;
+  display:inline-block;border:none;border-radius:7px;cursor:pointer;
+  font-family:'Sora',sans-serif;font-weight:700;
+  transition:filter .2s;
 }
-
-button {
-    width: 100%;
-    padding: 12px;
-    border: none;
-    border-radius: 8px;
-    font-weight: bold;
-    cursor: pointer;
-    margin-top: 8px;
+.btn-sm:hover{filter:brightness(1.1);}
+ 
+/* ===== STATUS WIDGET ===== */
+.status-widget{
+  text-align:center;padding:9px;border-radius:8px;
+  margin-bottom:12px;font-weight:700;font-size:14px;
+  transition:background .3s,color .3s;
 }
-
-.copy-btn { background: #27ae60; color: white; }
-.clean-btn { background: #e67e22; color: white; }
-
-footer {
-    margin-top: 20px;
-    text-align: center;
-    font-size: 0.75em;
-    opacity: 0.8;
+.pending{background:var(--yellow);color:#5a3e00;}
+.approved{background:var(--green);color:#fff;}
+.rejected{background:var(--red);color:#fff;}
+ 
+/* ===== TITLE BOX ===== */
+.title-box{
+  background:linear-gradient(135deg,#5f6a72,#2f3640);
+  color:#fff;padding:12px;border-radius:10px;
+  text-align:center;font-weight:700;
+  margin-bottom:12px;font-size:14px;letter-spacing:.3px;
 }
-
-.popup {
-    position: fixed;
-    top: 50%;
-    left: 50%;
-    transform: translate(-50%, -50%);
-    background: #2f3640;
-    color: white;
-    padding: 20px 30px;
-    border-radius: 10px;
-    text-align: center;
-    display: none;
-    z-index: 999;
+ 
+/* ===== MAIN BLOCK ===== */
+.main-block{
+  background:var(--surface2);padding:14px;
+  border-radius:10px;border:1px solid var(--border);
+  transition:background .3s;
 }
+ 
+/* ===== TOGGLE SWITCH ===== */
+.switch{width:50px;height:26px;position:relative;display:inline-block;}
+.switch input{display:none;}
+.slider{
+  position:absolute;background:#ccc;border-radius:50px;
+  top:0;left:0;right:0;bottom:0;transition:.3s;
+}
+.slider:before{
+  content:"";position:absolute;width:20px;height:20px;
+  left:3px;top:3px;background:white;border-radius:50%;transition:.3s;
+}
+.switch input:checked+.slider{background:var(--accent);}
+.switch input:checked+.slider:before{transform:translateX(24px);}
+ 
+/* ===== POPUP ===== */
+.popup{
+  position:fixed;top:50%;left:50%;
+  transform:translate(-50%,-50%);
+  background:#2f3640;color:#fff;
+  padding:18px 24px;border-radius:12px;
+  display:none;z-index:999;text-align:center;
+  font-size:14px;font-family:'JetBrains Mono',monospace;
+  white-space:pre-line;line-height:1.6;
+  box-shadow:0 8px 40px rgba(0,0,0,.4);
+  max-width:320px;
+}
+body.dark .popup{background:#1c2128;border:1px solid var(--border);}
+ 
+/* ===== CONSOLE ===== */
+.console-box{
+  background:#0d1117;color:#58a6ff;
+  font-family:'JetBrains Mono',monospace;
+  font-size:11.5px;line-height:1.7;
+  padding:12px;border-radius:8px;
+  min-height:160px;max-height:280px;
+  overflow-y:auto;white-space:pre-wrap;
+  border:1px solid #30363d;
+}
+body:not(.dark) .console-box{
+  background:#1a1e26;color:#58a6ff;
+}
+ 
+/* ===== DASHBOARD ===== */
+.dash-row{
+  display:flex;gap:10px;align-items:center;
+  padding:10px;border-radius:9px;
+  background:var(--surface2);border:1px solid var(--border);
+  font-size:13px;font-weight:600;flex-wrap:wrap;
+}
+.dash-ok{color:var(--green);}
+.dash-nok{color:var(--red);}
+.dash-pct{
+  margin-left:auto;font-size:16px;font-weight:700;
+  color:var(--text);
+}
+ 
+/* ===== OTDR RESULT ROW ===== */
+.otdr-result{
+  font-size:12px;padding:8px 10px;
+  border-radius:7px;margin-top:8px;
+  font-family:'JetBrains Mono',monospace;
+  border:1px solid var(--border);
+  background:var(--surface2);
+}
+.otdr-ok{border-left:3px solid var(--green);}
+.otdr-hi{border-left:3px solid var(--red);}
+.otdr-lbl{font-weight:700;color:var(--text2);}
+ 
+/* ===== INLINE ROW ===== */
+.row{display:flex;gap:8px;align-items:flex-end;}
+.row>*{flex:1;}
+ 
+/* ===== FOOTER ===== */
+.footer{
+  text-align:center;padding:20px;
+  font-size:12px;color:var(--text2);
+  border-top:1px solid var(--border);margin-top:10px;
+}
+ 
+/* ===== KMZ MAP ===== */
+#kmz-map{
+  width:100%;height:240px;border-radius:8px;
+  border:1px solid var(--border);margin-top:10px;
+  display:none;
+}
+ 
+.dist-row{
+  display:flex;align-items:center;gap:8px;margin-top:10px;
+}
+.dist-row label{margin:0;width:auto;white-space:nowrap;}
+.dist-row input{flex:1;}
 </style>
 </head>
-
 <body>
-
-<div class="card">
-
-<!-- NEW MODERN TOGGLE -->
-<div class="theme-switch">
+ 
+<div class="header">
+  <div class="header-left">
+    <div class="header-dot"></div>
+    CABLE & OPERATIONS TEAM &nbsp;||&nbsp; FO FIELD VALIDATION & REPORTING TOOL
+  </div>
+  <div class="theme-switch">
     <input type="checkbox" id="darkModeToggle" onchange="toggleDark()">
     <label for="darkModeToggle"></label>
+  </div>
 </div>
-
-<div class="title-box">Checklist FO Report Tool</div>
-
-<div id="widget" class="status-widget pending">Pending</div>
-
-<div class="main-block">
-
-<div class="section">
-<label>CHECKLIST</label>
-<input type="text" id="checklist" placeholder="CAJ0590 - CAJ0042 CHECKLIST">
+ 
+<div class="container">
+ 
+  <!-- ======== LEFT PANEL ======== -->
+  <div class="left-panel">
+ 
+    <!-- [1] GUIDE -->
+    <div class="card" style="padding:0;overflow:hidden;">
+      <div class="mod-header" onclick="toggleMod(this)">
+        <div class="mod-title">
+          <div class="mod-icon">1</div>
+          Guide — Checklist Procedure
+        </div>
+        <span class="mod-arrow">▼</span>
+      </div>
+      <div class="mod-body">
+        <p style="font-size:13px;color:var(--text2);margin-bottom:10px;">Quick access to the official FO checklist procedure document.</p>
+        <button class="btn btn-blue" onclick="window.open('https://drive.google.com/drive/folders/1osWzQPXeprKQscOk2gY4Riy-Vc7W83fa?usp=drive_link','_blank')">📄 Open Checklist Guide</button>
+      </div>
+    </div>
+ 
+    <!-- [2] KMZ / KML -->
+    <div class="card" style="padding:0;overflow:hidden;">
+      <div class="mod-header" onclick="toggleMod(this)">
+        <div class="mod-title">
+          <div class="mod-icon" style="background:#8e44ad;">2</div>
+          KMZ / KML Tool
+        </div>
+        <span class="mod-arrow">▼</span>
+      </div>
+      <div class="mod-body">
+        <label>Load File (.kmz or .kml)</label>
+        <input type="file" id="kmzFile" accept=".kmz,.kml" style="font-size:12px;" onchange="loadKMZ()">
+ 
+        <div class="row" style="margin-top:10px;">
+          <button class="btn btn-blue" onclick="processKMZ()" style="margin-top:0;">Process KMZ/KML</button>
+          <button class="btn btn-gray" onclick="viewKMZMap()" style="margin-top:0;background:var(--surface2);">View Map</button>
+        </div>
+ 
+        <div class="dist-row">
+          <label>Total Distance:</label>
+          <input type="number" id="kmzDist" step="0.01" placeholder="0.00">
+          <span style="font-size:13px;font-weight:600;color:var(--text2);">km</span>
+        </div>
+ 
+        <div id="kmzStatus" style="margin-top:10px;font-size:12px;color:var(--text2);font-family:'JetBrains Mono',monospace;"></div>
+        <div id="kmz-map"></div>
+      </div>
+    </div>
+ 
+    <!-- [3] OTDR CALCULATOR -->
+    <div class="card" style="padding:0;overflow:hidden;">
+      <div class="mod-header" onclick="toggleMod(this)">
+        <div class="mod-title">
+          <div class="mod-icon" style="background:#e67e22;">3</div>
+          OTDR Calculator
+        </div>
+        <span class="mod-arrow">▼</span>
+      </div>
+      <div class="mod-body">
+        <div class="row">
+          <div>
+            <label>Distance (km)</label>
+            <input type="number" id="o_dist" step="0.01" placeholder="0.00">
+          </div>
+          <div>
+            <label>Mufas</label>
+            <input type="number" id="o_mufa" value="0" min="0">
+          </div>
+        </div>
+        <div class="row">
+          <div>
+            <label>Empalmes</label>
+            <input type="number" id="o_emp" value="2" min="0">
+          </div>
+          <div>
+            <label>Conectores</label>
+            <input type="number" id="o_con" value="2" min="0">
+          </div>
+          <div>
+            <label>Patchcords</label>
+            <input type="number" id="o_pc" value="2" min="0">
+          </div>
+        </div>
+        <button class="btn btn-orange" onclick="calcOTDR()">Calculate Loss</button>
+ 
+        <div id="otdrResults"></div>
+      </div>
+    </div>
+ 
+    <!-- [4] REPORT PREVIEW -->
+    <div class="card" style="padding:0;overflow:hidden;">
+      <div class="mod-header" onclick="toggleMod(this)">
+        <div class="mod-title">
+          <div class="mod-icon" style="background:#1a1e26;">4</div>
+          Report Preview (Console)
+        </div>
+        <span class="mod-arrow">▼</span>
+      </div>
+      <div class="mod-body">
+        <div class="console-box" id="reportConsole">— waiting for input —</div>
+        <button class="btn btn-gray" onclick="copyConsole()">Copy Preview</button>
+      </div>
+    </div>
+ 
+    <!-- [5] MINI DASHBOARD -->
+    <div class="card" style="padding:0;overflow:hidden;">
+      <div class="mod-header" onclick="toggleMod(this)">
+        <div class="mod-title">
+          <div class="mod-icon" style="background:#27ae60;">5</div>
+          Mini Dashboard
+        </div>
+        <span class="mod-arrow">▼</span>
+      </div>
+      <div class="mod-body">
+        <div class="dash-row" id="dashRow">
+          <span class="dash-ok">✔ OK: —</span>
+          <span class="dash-nok">✘ NOK: —</span>
+          <span class="dash-pct" id="dashPct">—%</span>
+        </div>
+        <p style="font-size:11px;color:var(--text2);margin-top:8px;">Updates in real time based on the checklist form.</p>
+      </div>
+    </div>
+ 
+    <!-- [6] DAILY REPORT -->
+    <div class="card" style="padding:0;overflow:hidden;">
+      <div class="mod-header" onclick="toggleMod(this)">
+        <div class="mod-title">
+          <div class="mod-icon" style="background:#2980b9;">6</div>
+          Daily Report Tool
+        </div>
+        <span class="mod-arrow">▼</span>
+      </div>
+      <div class="mod-body">
+        <label>Routes (one per line: Route - STATUS)</label>
+        <textarea id="dailyInput" rows="5" placeholder="Route_A - APPROVED&#10;Route_B - REJECTED&#10;Route_C - APPROVED"></textarea>
+        <div class="row">
+          <button class="btn btn-blue" onclick="genDaily()" style="margin-top:8px;">Generate Daily Report</button>
+          <button class="btn btn-gray" onclick="copyDaily()" style="margin-top:8px;">Copy Report</button>
+        </div>
+        <div id="dailyOut" class="console-box" style="display:none;margin-top:10px;"></div>
+      </div>
+    </div>
+ 
+    <!-- [7] WEEKLY PENDING -->
+    <div class="card" style="padding:0;overflow:hidden;">
+      <div class="mod-header" onclick="toggleMod(this)">
+        <div class="mod-title">
+          <div class="mod-icon" style="background:#c0392b;">7</div>
+          Weekly Pending Tool
+        </div>
+        <span class="mod-arrow">▼</span>
+      </div>
+      <div class="mod-body">
+        <label>Weekly data (DAY - STATUS - ROUTE)</label>
+        <textarea id="weeklyInput" rows="6" placeholder="Monday - APPROVED - Route_A&#10;Tuesday - REJECTED - Route_B&#10;Wednesday - REJECTED - Route_A"></textarea>
+        <div class="row">
+          <button class="btn btn-blue" onclick="processWeekly()" style="margin-top:8px;">Process Weekly</button>
+          <button class="btn btn-gray" onclick="copyWeekly()" style="margin-top:8px;">Copy Pending</button>
+        </div>
+        <div id="weeklyOut" class="console-box" style="display:none;margin-top:10px;"></div>
+      </div>
+    </div>
+ 
+  </div><!-- /left-panel -->
+ 
+  <!-- ======== RIGHT PANEL ======== -->
+  <div class="right-panel">
+    <div class="card">
+ 
+      <div class="title-box">Checklist FO Report Tool</div>
+ 
+      <div id="widget" class="status-widget pending">Pending</div>
+ 
+      <div class="main-block">
+        <label>Checklist</label>
+        <input type="text" id="checklist">
+ 
+        <label>TEC</label>
+        <input type="text" id="tec">
+ 
+        <label>Plan</label>
+        <input type="text" id="plan">
+      </div>
+ 
+      <div style="text-align:center;margin:14px 0;">
+        <label class="switch">
+          <input type="checkbox" id="extended">
+          <span class="slider"></span>
+        </label>
+        <div style="font-size:12px;font-weight:600;color:var(--text2);margin-top:4px;">Extended Site</div>
+      </div>
+ 
+      <hr style="border-color:var(--border);">
+ 
+      <div id="observations"></div>
+ 
+      <label>cc:</label>
+      <input type="text" id="cc" placeholder="Mr">
+ 
+      <button class="btn btn-green" onclick="generateReport()">Copy Checklist Report</button>
+      <button class="btn btn-orange" onclick="cleanAll()">Clean All</button>
+ 
+    </div>
+  </div>
+ 
+</div><!-- /container -->
+ 
+<div class="footer">
+  © Bryam Broncano (954465531) – CheckList Tools &nbsp;|&nbsp;
+  FO Field Validation & Reporting Tool v3.0.0 – Last edition: 1 May 2026
 </div>
-
-<div class="section">
-<label>TEC</label>
-<input type="text" id="tec" placeholder="3G/4G 1700/1900">
-</div>
-
-<div class="section">
-<label>PLAN</label>
-<input type="text" id="plan" placeholder="NEW SITE">
-</div>
-
-</div>
-
-<div class="section">
-<input type="checkbox" id="extended"> Extended Site
-</div>
-
-<hr>
-
-<div id="observations"></div>
-
-<div class="section">
-<label>cc:</label>
-<input type="text" id="cc" placeholder="Mr">
-</div>
-
-<button class="copy-btn" onclick="generateReport()">Copy Checklist Report</button>
-<button class="clean-btn" onclick="cleanAll()">Clean All</button>
-
-<footer>
-© Bryam Broncano (954465531) – CheckList Tool <br>
-Checklist Tool v2.0.0 - Last edition: 17 February 2026
-</footer>
-
-</div>
-
+ 
 <div id="popup" class="popup"></div>
-
+ 
+<!-- Leaflet for map -->
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/leaflet@1.9.4/dist/leaflet.css">
+<script src="https://cdn.jsdelivr.net/npm/leaflet@1.9.4/dist/leaflet.js"></script>
+<!-- JSZip for .kmz -->
+<script src="https://cdn.jsdelivr.net/npm/jszip@3.10.1/dist/jszip.min.js"></script>
+ 
 <script>
-const params = ["OUTDOOR","INDOOR","KMZ","PHOTOS","ZIP/RAR","PL"];
-const obsContainer = document.getElementById("observations");
-
-function renderObservations(){
-    obsContainer.innerHTML="";
-    const isExtended=document.getElementById("extended").checked;
-    params.forEach(p=>{
-        if(p==="PL" && isExtended) return;
-        const div=document.createElement("div");
-        div.innerHTML=`<label>${p}</label>
-        <textarea id="obs_${p}" placeholder="Write observation if NOK..."></textarea>`;
-        obsContainer.appendChild(div);
-        const ta=div.querySelector("textarea");
-        ta.addEventListener("input",()=>{
-            ta.classList.toggle("filled",ta.value.trim()!=="");
-            updateWidget();
-        });
-    });
+/* =========================================================
+   ACCORDION
+========================================================= */
+function toggleMod(header){
+  const arrow=header.querySelector('.mod-arrow');
+  const body=header.nextElementSibling;
+  const open=body.classList.toggle('open');
+  arrow.classList.toggle('open',open);
 }
-document.getElementById("extended").addEventListener("change",renderObservations);
-renderObservations();
-
-function updateWidget(){
-    const checklist=document.getElementById("checklist").value.trim();
-    const tec=document.getElementById("tec").value.trim();
-    const plan=document.getElementById("plan").value.trim();
-    const widget=document.getElementById("widget");
-
-    if(!checklist || !tec || !plan){
-        widget.className="status-widget pending";
-        widget.innerText="Pending";
-        return;
-    }
-
-    let hasNok=false;
-    params.forEach(p=>{
-        const el=document.getElementById(`obs_${p}`);
-        if(el && el.value.trim()) hasNok=true;
-    });
-
-    if(hasNok){
-        widget.className="status-widget rejected";
-        widget.innerText="Rejected";
-    } else {
-        widget.className="status-widget approved";
-        widget.innerText="Approved";
-    }
-}
-
-document.querySelectorAll("#checklist,#tec,#plan")
-.forEach(el=>el.addEventListener("input",updateWidget));
-
-function generateReport(){
-    const checklist=document.getElementById("checklist").value.trim();
-    const tec=document.getElementById("tec").value.trim();
-    const plan=document.getElementById("plan").value.trim();
-    const cc=document.getElementById("cc").value.trim();
-    const isExtended=document.getElementById("extended").checked;
-
-    if(!checklist || !tec || !plan){
-        alert("Checklist, TEC and PLAN are mandatory.");
-        return;
-    }
-
-    let summary=[];
-    let obsLines=[];
-    let allFilled=true;
-    let hasNok=false;
-
-    params.forEach(p=>{
-        if(p==="PL" && isExtended) return;
-        const el=document.getElementById(`obs_${p}`);
-        const text=el?el.value.trim():"";
-        if(text){
-            summary.push(`${p}: NOK`);
-            obsLines.push(`* ${p}: ${text}`);
-            hasNok=true;
-        } else {
-            summary.push(`${p}: OK`);
-            allFilled=false;
-        }
-    });
-
-    const status=hasNok?"REJECTED":"APPROVED";
-    const date=new Date().toLocaleDateString("en-GB");
-
-    let report="";
-    report+="DEPT: TRA / Cable Operation Team\n";
-    report+=`${checklist}\n`;
-    report+=`TEC: ${tec}\n`;
-    report+=`PLAN: ${plan}\n\n`;
-    report+=summary.join("\n")+"\n\n";
-    report+=`STATUS: ${status}\n`;
-    report+=`DATE: ${date}\n\n`;
-
-    if(obsLines.length){
-        report+="OBS:\n";
-        report+=obsLines.join("\n");
-        if(allFilled){
-            report+="\n\n⚠️ Please review the checklist guide in the group description ⚠️";
-        }
-        report+="\n\n";
-    }
-
-    report+=`cc: ${cc}`;
-
-    navigator.clipboard.writeText(report);
-    showPopup(`${checklist}\n${status}\nCopied successfully`);
-}
-
-function showPopup(text){
-    const popup=document.getElementById("popup");
-    popup.innerText=text;
-    popup.style.display="block";
-    setTimeout(()=>popup.style.display="none",2500);
-}
-
-function cleanAll(){
-    document.querySelectorAll("input[type=text],textarea").forEach(el=>el.value="");
-    document.getElementById("extended").checked=false;
-    renderObservations();
-    updateWidget();
-}
-
+ 
+/* =========================================================
+   DARK MODE
+========================================================= */
 function toggleDark(){
-    document.body.classList.toggle("dark");
+  document.body.classList.toggle('dark');
 }
+ 
+/* =========================================================
+   RIGHT PANEL — CHECKLIST PARAMS
+========================================================= */
+const params=["OUTDOOR","INDOOR","KMZ","PHOTOS","ZIP/RAR","PL"];
+const obs=document.getElementById("observations");
+ 
+function render(){
+  obs.innerHTML="";
+  const ex=document.getElementById("extended").checked;
+  params.forEach(p=>{
+    if(p==="PL"&&ex)return;
+    const div=document.createElement("div");
+    div.innerHTML=`<label>${p}</label>
+<textarea id="obs_${p}" placeholder="Write observation if NOK..."></textarea>`;
+    const ta=div.querySelector("textarea");
+    ta.addEventListener("input",()=>{
+      ta.classList.toggle("filled",ta.value.trim()!=="");
+      updateWidget();
+      updateConsole();
+      updateDash();
+    });
+    obs.appendChild(div);
+  });
+}
+document.getElementById("extended").addEventListener("change",()=>{render();updateWidget();updateConsole();updateDash();});
+render();
+ 
+function updateWidget(){
+  const checklist=document.getElementById("checklist").value.trim();
+  const tec=document.getElementById("tec").value.trim();
+  const plan=document.getElementById("plan").value.trim();
+  const widget=document.getElementById("widget");
+  if(!checklist||!tec||!plan){
+    widget.className="status-widget pending";widget.innerText="Pending";return;
+  }
+  let hasNok=false;
+  params.forEach(p=>{const el=document.getElementById(`obs_${p}`);if(el&&el.value.trim())hasNok=true;});
+  widget.className=hasNok?"status-widget rejected":"status-widget approved";
+  widget.innerText=hasNok?"Rejected":"Approved";
+}
+document.querySelectorAll("#checklist,#tec,#plan,#cc")
+  .forEach(el=>el.addEventListener("input",()=>{updateWidget();updateConsole();updateDash();}));
+ 
+/* =========================================================
+   REPORT GENERATE (RIGHT PANEL)
+========================================================= */
+function buildReport(){
+  const checklist=document.getElementById("checklist").value.trim();
+  const tec=document.getElementById("tec").value.toUpperCase();
+  const plan=document.getElementById("plan").value.toUpperCase();
+  const cc=document.getElementById("cc").value;
+  if(!checklist||!tec||!plan)return null;
+ 
+  let summary=[],obsLines=[],hasNok=false,allFilled=true;
+  params.forEach(p=>{
+    const el=document.getElementById(`obs_${p}`);
+    if(!el)return;
+    const text=el.value.trim();
+    if(text){summary.push(`${p}: NOK`);obsLines.push(`* ${p}: ${text}`);hasNok=true;}
+    else{summary.push(`${p}: OK`);allFilled=false;}
+  });
+ 
+  const status=hasNok?"REJECTED":"APPROVED";
+  const date=new Date().toLocaleDateString("en-GB");
+ 
+  let r="DEPT: TRA / Cable Operation Team\n";
+  r+=`${checklist}\n`;
+  r+=`TEC: ${tec}\n`;
+  r+=`PLAN: ${plan}\n\n`;
+  r+=summary.join("\n")+"\n\n";
+  r+=`STATUS: ${status}\n`;
+  r+=`DATE: ${date}\n\n`;
+ 
+  if(obsLines.length){
+    r+="OBS:\n";
+    r+=obsLines.join("\n");
+    if(allFilled)r+="\n\n⚠️ Please review the checklist guide in the group description ⚠️";
+    r+="\n\n";
+  }
+  r+=`cc: ${cc}`;
+  return r;
+}
+ 
+function generateReport(){
+  const checklist=document.getElementById("checklist").value.trim();
+  const tec=document.getElementById("tec").value.trim();
+  const plan=document.getElementById("plan").value.trim();
+  if(!checklist||!tec||!plan){alert("Checklist, TEC and PLAN required");return;}
+  const r=buildReport();
+  navigator.clipboard.writeText(r);
+  const status=r.includes("REJECTED")?"REJECTED":"APPROVED";
+  showPopup(`${checklist}\n${status}\nCopied successfully`);
+}
+ 
+function cleanAll(){
+  if(!confirm("Clean all?"))return;
+  document.querySelectorAll("input[type=text],input[type=number],textarea").forEach(e=>e.value="");
+  document.getElementById("extended").checked=false;
+  render();updateWidget();updateConsole();updateDash();
+}
+ 
+/* =========================================================
+   REPORT PREVIEW (Console)
+========================================================= */
+function updateConsole(){
+  const con=document.getElementById("reportConsole");
+  const r=buildReport();
+  con.textContent=r||"— waiting for input —";
+}
+ 
+function copyConsole(){
+  const txt=document.getElementById("reportConsole").textContent;
+  if(txt==="— waiting for input —")return;
+  navigator.clipboard.writeText(txt);
+  showPopup("Preview copied!");
+}
+ 
+/* =========================================================
+   MINI DASHBOARD
+========================================================= */
+function updateDash(){
+  let ok=0,nok=0,total=0;
+  params.forEach(p=>{
+    const el=document.getElementById(`obs_${p}`);
+    if(!el)return;
+    total++;
+    if(el.value.trim())nok++;else ok++;
+  });
+  const pct=total?Math.round((ok/total)*100):100;
+  document.getElementById("dashRow").innerHTML=
+    `<span class="dash-ok">✔ OK: ${ok}</span>
+     <span class="dash-nok">✘ NOK: ${nok}</span>
+     <span class="dash-pct">${pct}%</span>`;
+}
+ 
+/* =========================================================
+   OTDR CALCULATOR
+========================================================= */
+function calcOTDR(){
+  const dist=parseFloat(document.getElementById("o_dist").value)||0;
+  const mufa=parseInt(document.getElementById("o_mufa").value)||0;
+  const emp=parseInt(document.getElementById("o_emp").value)||0;
+  const con=parseInt(document.getElementById("o_con").value)||0;
+  const pc=parseInt(document.getElementById("o_pc").value)||0;
+ 
+  const events=mufa*0.2+emp*0.1+con*0.3+pc*0.2;
+ 
+  const nm1310=dist*0.35;
+  const nm1550=dist*0.22;
+  const t1310=nm1310+events;
+  const t1550=nm1550+events;
+ 
+  const ok1310=t1310<3.5;
+  const ok1550=t1550<3.0;
+ 
+  const d=n=>n.toFixed(3);
+ 
+  document.getElementById("otdrResults").innerHTML=`
+<div class="otdr-result ${ok1310?'otdr-ok':'otdr-hi'}">
+  <span class="otdr-lbl">1310 nm</span> &nbsp;
+  Fiber: ${d(nm1310)} dB &nbsp;|&nbsp; Events: ${d(events)} dB &nbsp;|&nbsp;
+  <strong>Total: ${d(t1310)} dB</strong> &nbsp;
+  <span style="color:${ok1310?'var(--green)':'var(--red)'};font-weight:700;">${ok1310?'✔ OK':'✘ HIGH'}</span>
+  <span style="font-size:10px;color:var(--text2);margin-left:8px;">limit 3.5 dB</span>
+</div>
+<div class="otdr-result ${ok1550?'otdr-ok':'otdr-hi'}">
+  <span class="otdr-lbl">1550 nm</span> &nbsp;
+  Fiber: ${d(nm1550)} dB &nbsp;|&nbsp; Events: ${d(events)} dB &nbsp;|&nbsp;
+  <strong>Total: ${d(t1550)} dB</strong> &nbsp;
+  <span style="color:${ok1550?'var(--green)':'var(--red)'};font-weight:700;">${ok1550?'✔ OK':'✘ HIGH'}</span>
+  <span style="font-size:10px;color:var(--text2);margin-left:8px;">limit 3.0 dB</span>
+</div>`;
+}
+ 
+/* =========================================================
+   DAILY REPORT
+========================================================= */
+let dailyResult="";
+ 
+function genDaily(){
+  const lines=document.getElementById("dailyInput").value.trim().split("\n").filter(l=>l.trim());
+  if(!lines.length){alert("Enter at least one route");return;}
+  const date=new Date().toLocaleDateString("en-GB");
+  const title="FO CHECKLIST REPORT - "+date;
+  const body=lines.map(l=>"- "+l.trim()).join("\n");
+  dailyResult=title+"\n\n"+body;
+  document.getElementById("dailyOut").style.display="block";
+  document.getElementById("dailyOut").textContent=dailyResult;
+}
+ 
+function copyDaily(){
+  if(!dailyResult){alert("Generate the report first");return;}
+  navigator.clipboard.writeText(dailyResult).then(()=>showPopup("Daily Report copied!")).catch(()=>showPopup("Copy failed — select manually"));
+}
+ 
+/* =========================================================
+   WEEKLY PENDING
+========================================================= */
+let weeklyResult="";
+ 
+function processWeekly(){
+  const raw=document.getElementById("weeklyInput").value.trim().split("\n").filter(l=>l.trim());
+  const map={};
+  const dayOrder=["Monday","Tuesday","Wednesday","Thursday","Friday","Saturday","Sunday",
+                  "Lunes","Martes","Miércoles","Miercoles","Jueves","Viernes","Sábado","Sabado","Domingo"];
+ 
+  raw.forEach(l=>{
+    // Support both tab-separated and " - " separated formats
+    let dia,status,ruta;
+    if(l.includes("\t")){
+      const parts=l.split("\t").map(x=>x.trim());
+      if(parts.length<3)return;
+      [dia,status,ruta]=parts;
+      status=status.toUpperCase();
+    } else {
+      const first=l.indexOf(" - ");
+      if(first===-1)return;
+      const second=l.indexOf(" - ",first+3);
+      if(second===-1)return;
+      dia=l.slice(0,first).trim();
+      status=l.slice(first+3,second).trim().toUpperCase();
+      ruta=l.slice(second+3).trim();
+    }
+    if(!ruta)return;
+    if(!ruta)return;
+ 
+    const idx=dayOrder.findIndex(d=>d.toLowerCase()===dia.toLowerCase());
+    if(!map[ruta]){
+      map[ruta]={status,dia,idx:idx===-1?0:idx};
+    } else {
+      const newIdx=idx===-1?0:idx;
+      if(newIdx>=map[ruta].idx){map[ruta]={status,dia,idx:newIdx};}
+    }
+  });
+ 
+  const pending=Object.entries(map).filter(([,v])=>v.status==="REJECTED");
+ 
+  const outEl=document.getElementById("weeklyOut");
+  outEl.style.display="block";
+ 
+  if(!pending.length){
+    weeklyResult="";
+    outEl.textContent="No pending routes this week.";
+    return;
+  }
+ 
+  weeklyResult="PENDING FO ROUTES\n\n";
+  pending.forEach(([ruta,v])=>{
+    weeklyResult+=`- ${ruta} - REJECTED - ${v.dia}\n`;
+  });
+  weeklyResult=weeklyResult.trim();
+  outEl.textContent=weeklyResult;
+}
+ 
+function copyWeekly(){
+  if(!weeklyResult){alert("Process weekly data first");return;}
+  navigator.clipboard.writeText(weeklyResult).then(()=>showPopup("Pending routes copied!")).catch(()=>showPopup("Copy failed — select manually"));
+}
+ 
+/* =========================================================
+   KMZ / KML
+========================================================= */
+let kmzCoords=[],kmzPoints=[];
+let kmzRawKML="";
+let leafletMap=null;
+ 
+function loadKMZ(){
+  document.getElementById("kmzStatus").textContent="File selected. Click Process.";
+}
+ 
+async function processKMZ(){
+  const file=document.getElementById("kmzFile").files[0];
+  if(!file){alert("Select a .kmz or .kml file first");return;}
+  document.getElementById("kmzStatus").textContent="Processing...";
+  kmzCoords=[];kmzPoints=[];
+ 
+  try{
+    if(file.name.endsWith(".kmz")){
+      const zip=await JSZip.loadAsync(await file.arrayBuffer());
+      const kmlEntry=Object.keys(zip.files).find(f=>f.endsWith(".kml"));
+      if(!kmlEntry){alert("No KML found inside KMZ");return;}
+      kmzRawKML=await zip.files[kmlEntry].async("string");
+    } else {
+      kmzRawKML=await file.text();
+    }
+ 
+    const parser=new DOMParser();
+    const doc=parser.parseFromString(kmzRawKML,"text/xml");
+ 
+    // Lines
+    doc.querySelectorAll("LineString coordinates,LineString>coordinates").forEach(el=>{
+      el.textContent.trim().split(/\s+/).forEach(c=>{
+        const parts=c.split(",");
+        if(parts.length>=2){kmzCoords.push([parseFloat(parts[1]),parseFloat(parts[0])]);}
+      });
+    });
+ 
+    // Points
+    doc.querySelectorAll("Point coordinates,Point>coordinates").forEach(el=>{
+      const p=el.textContent.trim().split(",");
+      if(p.length>=2)kmzPoints.push([parseFloat(p[1]),parseFloat(p[0])]);
+    });
+ 
+    // Distance
+    let distKm=0;
+    for(let i=1;i<kmzCoords.length;i++){
+      distKm+=haversine(kmzCoords[i-1],kmzCoords[i]);
+    }
+    if(distKm>0)document.getElementById("kmzDist").value=distKm.toFixed(3);
+ 
+    const total=kmzCoords.length+kmzPoints.length;
+    document.getElementById("kmzStatus").textContent=
+      `✔ Parsed: ${kmzCoords.length} line coords, ${kmzPoints.length} points. Dist: ${distKm.toFixed(3)} km`;
+  }catch(e){
+    document.getElementById("kmzStatus").textContent="Error: "+e.message;
+  }
+}
+ 
+function haversine([lat1,lon1],[lat2,lon2]){
+  const R=6371,dLat=(lat2-lat1)*Math.PI/180,dLon=(lon2-lon1)*Math.PI/180;
+  const a=Math.sin(dLat/2)**2+Math.cos(lat1*Math.PI/180)*Math.cos(lat2*Math.PI/180)*Math.sin(dLon/2)**2;
+  return R*2*Math.atan2(Math.sqrt(a),Math.sqrt(1-a));
+}
+ 
+function viewKMZMap(){
+  if(!kmzCoords.length&&!kmzPoints.length){alert("Process a file first");return;}
+  const mapDiv=document.getElementById("kmz-map");
+  mapDiv.style.display="block";
+ 
+  if(leafletMap){leafletMap.remove();leafletMap=null;}
+ 
+  setTimeout(()=>{
+    leafletMap=L.map("kmz-map");
+    L.tileLayer("https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png",{maxZoom:19,attribution:"© OpenStreetMap"}).addTo(leafletMap);
+ 
+    if(kmzCoords.length){
+      const poly=L.polyline(kmzCoords,{color:"#00a8ff",weight:4}).addTo(leafletMap);
+      leafletMap.fitBounds(poly.getBounds(),{padding:[20,20]});
+    } else if(kmzPoints.length){
+      leafletMap.setView(kmzPoints[0],14);
+    }
+ 
+    kmzPoints.forEach((pt,i)=>{
+      const isTower=(i===0||i===kmzPoints.length-1);
+      const marker=L.circleMarker(pt,{
+        radius:isTower?9:6,
+        color:isTower?"#c0392b":"#e67e22",
+        fillColor:isTower?"#c0392b":"#f0b429",
+        fillOpacity:1,weight:2
+      }).addTo(leafletMap);
+      marker.bindTooltip(isTower?"TOWER":"POLE",{permanent:false});
+    });
+ 
+    if(kmzCoords.length){
+      L.circleMarker(kmzCoords[0],{radius:8,color:"#27ae60",fillColor:"#27ae60",fillOpacity:1,weight:2}).addTo(leafletMap).bindTooltip("START",{permanent:true,direction:"top"});
+      L.circleMarker(kmzCoords[kmzCoords.length-1],{radius:8,color:"#c0392b",fillColor:"#c0392b",fillOpacity:1,weight:2}).addTo(leafletMap).bindTooltip("END",{permanent:true,direction:"top"});
+    }
+  },120);
+}
+ 
+/* =========================================================
+   POPUP
+========================================================= */
+function showPopup(text){
+  const p=document.getElementById("popup");
+  p.textContent=text;p.style.display="block";
+  setTimeout(()=>p.style.display="none",2200);
+}
+ 
+/* =========================================================
+   INIT
+========================================================= */
+updateDash();
 </script>
-
 </body>
 </html>
+ 
